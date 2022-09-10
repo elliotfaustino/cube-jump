@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Making your first Phaser 3 Game - Part 7</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0
+        }
+    </style>
+</head>
+
+<body>
+
+    <script type="text/javascript">
+        // Movement constants
+        const MAX_SPEED = 500 // pixels/sec
+        const ACCELERATION = 1500  // pixels/sec/sec
+        const DRAG = 600 // pixels/sec
+        const GRAVITY = 1300 // pixels/sec/sec
+        const JUMP_SPEED = -500 // pixels/sec (negative y axis is up)
+        const width = 800
+        const height = 600
+
+        const config = {
+            type: Phaser.AUTO,
+            width: width,
+            height: height,
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: GRAVITY },
+                    debug: false
+                }
+            },
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        }
+
+        // Game letiables
+        let player
+        let platforms
+        let cursors
+        let spacebar
+        let jumping = false
+        let score = 0
+        let scoreText
+        let gameOver
+
+        let game = new Phaser.Game(config)
+
+        function preload() {
+            this.load.image('cube', 'assets/cube.png')
+            this.load.image('background', 'assets/background.png')
+            this.load.image('ground', 'assets/ground.png')
+        }
+
+        function create() {
+            this.add.tileSprite(0, 0, 2400, 1600, 'background')
+
+            platforms = this.physics.add.staticGroup()
+
+            platforms.create(400, 568, 'ground').setScale(2).refreshBody()
+
+            // // Create player sprite
+            player = this.physics.add.sprite(100, 440, 'cube')
+            player.setBounce(0.2)
+            player.setCollideWorldBounds(true)
+            player.body.setMaxVelocity(MAX_SPEED, MAX_SPEED * 100)
+            player.body.drag.setTo(DRAG, 0); // x, y
+            player.body.allowRotation = true
+
+            spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+
+            this.physics.add.collider(player, platforms)
+        }
+
+        function update() {
+
+            // Triple jump! Third jump is half the velocity of a regular jump
+            if (Phaser.Input.Keyboard.JustDown(spacebar) && player.body.touching.down) {
+                jumping = true
+                player.setVelocityY(JUMP_SPEED)
+                player.body.angularVelocity = 500
+            }
+            if (jumping === false && player.body.touching.down){
+                player.body.angularVelocity = 0
+                player.body.velocity.x = 0
+                player.body.velocity.y = 0
+                console.log("whoa", jumping)
+            }
+            // if (player.body.blocked.down || player.body.touching.down) {
+            //     jumpCount = 0
+            // }
+        }
+
+        // function collectStar(player, star) {
+        //     star.disableBody(true, true)
+
+        //     score += 10
+        //     scoreText.setText('Score: ' + score)
+
+        //     // if all stars are collected, it makes new stars and creates a bomb !!!!!!!!!!!!!!!!
+        //     if (stars.countActive(true) === 0) {
+        //         stars.children.iterate(function (child) {
+
+        //             child.enableBody(true, child.x, 0, true, true)
+
+        //         })
+
+        //         let x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400)
+
+        //         let bomb = bombs.create(x, 16, 'bomb')
+        //         bomb.setBounce(1)
+        //         bomb.setCollideWorldBounds(true)
+        //         bomb.setVelocity(Phaser.Math.Between(-100, 100), 10)
+
+        //     }
+        // }
+
+        // // hello this stops the game, turns the player red, 
+        // function hitBomb(player, bomb) {
+        //     this.physics.pause()
+
+        //     player.setTint(0xff0000)
+
+        //     player.anims.play('turn')
+
+        //     gameOver = true
+        // }
+
+    </script>
+
+</body>
+
+</html>
